@@ -1,10 +1,11 @@
+import { useState, FormEvent } from "react";
 import Modal from "react-modal";
 import { Container, TransactionTypeContainer, RadioBox } from "./styles";
 
 import incomeImg from "../../assets/income.svg";
 import outcomeImg from "../../assets/outcome.svg";
 import closeImg from "../../assets/close.svg";
-import { useState } from "react";
+import { api } from "../../services/api";
 
 interface NewTransactionModalProps {
   isOpen: boolean;
@@ -17,7 +18,24 @@ export function NewTransactionModal({
   isOpen,
   onRequestClose,
 }: NewTransactionModalProps) {
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [value, setValue] = useState(0);
+
   const [type, setType] = useState("deposit");
+
+  function handleCreateNewTransaction(event: FormEvent) {
+    event.preventDefault();
+
+    const transaction = {
+      title,
+      category,
+      value,
+      type,
+    };
+
+    api.post("/transactions", transaction);
+  }
 
   return (
     <Modal
@@ -33,12 +51,21 @@ export function NewTransactionModal({
       >
         <img src={closeImg} alt="Fechar Modal" />
       </button>
-      <Container>
+      <Container onSubmit={handleCreateNewTransaction}>
         <h2>Cadastrar transacao</h2>
 
-        <input placeholder="Titulo" />
+        <input
+          placeholder="Titulo"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
 
-        <input placeholder="Valor" type="number" />
+        <input
+          placeholder="Valor"
+          type="number"
+          value={value}
+          onChange={(e) => setValue(Number(e.target.value))}
+        />
         <TransactionTypeContainer>
           <RadioBox
             type="button"
@@ -64,7 +91,11 @@ export function NewTransactionModal({
           </RadioBox>
         </TransactionTypeContainer>
 
-        <input placeholder="Categoria" />
+        <input
+          placeholder="Categoria"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
 
         <button type="submit">Cadastrar</button>
       </Container>
